@@ -1,5 +1,24 @@
 import { X, Calendar, Users, MapPin, ExternalLink } from 'lucide-react';
-import type { Room } from './RoomShowcase';
+
+interface RoomImage {
+  id: number;
+  url: string;
+  alt: string;
+  type: 'main' | 'gallery';
+}
+
+interface Room {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  price_per_night: number;
+  max_capacity: number;
+  available_rooms: number;
+  additional_features: string[];
+  main_image: RoomImage | null;
+  images?: RoomImage[];
+}
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -8,6 +27,8 @@ interface BookingModalProps {
   checkIn: string;
   checkOut: string;
   guests: number;
+  nights: number;
+  totalPrice: number;
 }
 
 const formatPrice = (price: number) => {
@@ -30,13 +51,18 @@ const formatDate = (dateStr: string) => {
   });
 };
 
-const calculateNights = (checkIn: string, checkOut: string) => {
-  if (!checkIn || !checkOut) return 1;
-  const start = new Date(checkIn);
-  const end = new Date(checkOut);
-  const diffTime = Math.abs(end.getTime() - start.getTime());
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  return diffDays || 1;
+const getImageUrl = (url: string | undefined) => {
+  if (!url) return '';
+  
+  if (url.startsWith('http')) {
+    return url;
+  }
+  
+  if (url.startsWith('/storage/')) {
+    return `http://localhost:8000${url}`;
+  }
+  
+  return `http://localhost:8000/storage/${url}`;
 };
 
 const BookingModal = ({
@@ -46,25 +72,27 @@ const BookingModal = ({
   checkIn,
   checkOut,
   guests,
+  nights,
+  totalPrice,
 }: BookingModalProps) => {
-  if (!isOpen) return null;
+  if (!isOpen || !room) return null;
 
-  const nights = calculateNights(checkIn, checkOut);
-  const roomPrice = room?.price || 2800000;
-  const subtotal = roomPrice * nights;
+  const subtotal = totalPrice;
   const serviceFee = Math.round(subtotal * 0.1);
   const total = subtotal + serviceFee;
 
   const handleWhatsAppBooking = () => {
     const message = encodeURIComponent(
       `Halo, saya ingin melakukan reservasi:\n\n` +
-      `🏨 Kamar: ${room?.name || 'Pool Suite'}\n` +
+      `🏨 Kamar: ${room.name}\n` +
       `📅 Check-in: ${formatDate(checkIn)}\n` +
       `📅 Check-out: ${formatDate(checkOut)}\n` +
+      `🌙 Durasi: ${nights} malam\n` +
       `👥 Tamu: ${guests} orang\n` +
       `💰 Total: ${formatPrice(total)}\n\n` +
       `Mohon konfirmasi ketersediaan. Terima kasih!`
     );
+    // Ganti nomor WA sesuai hotel lo
     window.open(`https://wa.me/6281234567890?text=${message}`, '_blank');
   };
 
@@ -101,19 +129,27 @@ const BookingModal = ({
           <div className="flex gap-4 p-4 bg-secondary/50 rounded-2xl">
             <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0">
               <img
-                src={room?.image}
-                alt={room?.name}
+                src={getImageUrl(room.main_image?.url)}
+                alt={room.main_image?.alt || room.name}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  e.currentTarget.src = 'https://via.placeholder.com/80';
+                }}
               />
             </div>
-            <div>
+            <div className="flex-1">
               <h3 className="font-serif font-semibold text-foreground">
-                {room?.name || 'Pool Suite'}
+                {room.name}
               </h3>
               <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                 <MapPin className="w-4 h-4" />
                 Asmaralaya Escape, Ubud
               </p>
+              {room.available_rooms > 0 && room.available_rooms <= 5 && (
+                <p className="text-xs text-orange-500 mt-1">
+                  ⚠️ Hanya {room.available_rooms} kamar tersisa
+                </p>
+              )}
             </div>
           </div>
 
@@ -146,7 +182,7 @@ const BookingModal = ({
           <div className="bg-secondary/30 rounded-2xl p-4 space-y-3">
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">
-                {formatPrice(roomPrice)} × {nights} malam
+                {formatPrice(room.price_per_night)} × {nights} malam
               </span>
               <span className="text-foreground">{formatPrice(subtotal)}</span>
             </div>
@@ -170,7 +206,7 @@ const BookingModal = ({
             onClick={handleWhatsAppBooking}
             className="w-full btn-primary flex items-center justify-center gap-2 py-4"
           >
-            <span>Continue to WhatsApp Payment</span>
+            <span>Lanjutkan ke WhatsApp</span>
             <ExternalLink className="w-4 h-4" />
           </button>
           <p className="text-center text-xs text-muted-foreground mt-4">
