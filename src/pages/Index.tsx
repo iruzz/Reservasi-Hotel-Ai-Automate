@@ -5,6 +5,7 @@ import TrustBar from '@/components/TrustBar';
 import BookingBar from '@/components/BookingBar';
 import RoomShowcase, { type Room } from '@/components/RoomShowcase';
 import FacilitiesSection from '@/components/FacilitiesSection';
+import CTASection from '@/components/CTASection';
 import AIChatBubble from '@/components/AIChatBubble';
 import BookingModal from '@/components/BookingModal';
 import Footer from '@/components/Footer';
@@ -56,6 +57,7 @@ const Index = () => {
         <TrustBar />
         <RoomShowcase onQuickBook={handleQuickBook} />
         <FacilitiesSection />
+        <CTASection onBookNowClick={handleBookNowClick} />
       </main>
 
       <Footer />
