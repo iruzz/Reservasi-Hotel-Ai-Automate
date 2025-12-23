@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowRight, ChevronLeft, ChevronRight, Eye } from 'lucide-react';
 import roomSuite from '@/assets/room-suite.jpg';
 import roomDeluxe from '@/assets/room-deluxe.jpg';
 import roomVilla from '@/assets/room-villa.jpg';
+import RoomDetailModal from './RoomDetailModal';
 
 interface RoomImage {
   id: number;
@@ -21,7 +22,7 @@ interface Room {
   available_rooms: number;
   additional_features: string[];
   main_image: RoomImage | null;
-  images?: RoomImage[]; // Semua images (main + gallery)
+  images?: RoomImage[];
 }
 
 interface RoomShowcaseProps {
@@ -37,15 +38,12 @@ const formatPrice = (price: number) => {
   }).format(price);
 };
 
-// Fallback images jika API ga return image
 const fallbackImages: { [key: string]: string } = {
   deluxe: roomDeluxe,
   suite: roomSuite,
   villa: roomVilla,
 };
 
-// Image Carousel Component untuk setiap room card
-// Image Carousel Component untuk setiap room card
 const RoomImageCarousel = ({ images, roomName, roomSlug }: { 
   images: RoomImage[] | undefined; 
   roomName: string;
@@ -53,12 +51,10 @@ const RoomImageCarousel = ({ images, roomName, roomSlug }: {
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Filter dan sort images
   const validImages = images && images.length > 0 
     ? images.filter(img => img.url) 
     : [];
 
-  // Fallback ke image lokal
   const displayImages = validImages.length > 0 
     ? validImages 
     : [{ id: 0, url: fallbackImages[roomSlug] || roomDeluxe, alt: roomName, type: 'main' as const }];
@@ -73,20 +69,15 @@ const RoomImageCarousel = ({ images, roomName, roomSlug }: {
     setCurrentIndex((prev) => (prev - 1 + displayImages.length) % displayImages.length);
   };
 
-  // Construct full image URL
   const getImageUrl = (url: string) => {
-    // Kalo url udah full (https://) return as is
     if (url.startsWith('http')) {
       return url;
     }
     
-    // Kalo path udah include '/storage/', langsung append ke base URL
     if (url.startsWith('/storage/')) {
       return `http://localhost:8000${url}`;
     }
     
-    // Kalo path relatif tanpa '/storage/', tambahin
-    // Misal: 'rooms/room-deluxe.jpg' -> '/storage/rooms/room-deluxe.jpg'
     return `http://localhost:8000/storage/${url}`;
   };
 
@@ -102,7 +93,6 @@ const RoomImageCarousel = ({ images, roomName, roomSlug }: {
         }}
       />
 
-      {/* Navigation Arrows - hanya muncul kalo ada > 1 image */}
       {displayImages.length > 1 && (
         <>
           <button
@@ -120,7 +110,6 @@ const RoomImageCarousel = ({ images, roomName, roomSlug }: {
             <ChevronRight className="w-5 h-5" />
           </button>
 
-          {/* Dots Indicator */}
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5">
             {displayImages.map((_, idx) => (
               <button
@@ -141,7 +130,6 @@ const RoomImageCarousel = ({ images, roomName, roomSlug }: {
         </>
       )}
 
-      {/* Image Counter */}
       {displayImages.length > 1 && (
         <div className="absolute top-2 left-2 glass-strong rounded-full px-2 py-1">
           <span className="text-xs text-foreground font-medium">
@@ -157,6 +145,8 @@ const RoomShowcase = ({ onQuickBook }: RoomShowcaseProps) => {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
   useEffect(() => {
     fetchRooms();
@@ -194,6 +184,16 @@ const RoomShowcase = ({ onQuickBook }: RoomShowcaseProps) => {
     }
   };
 
+  const handleViewDetails = (room: Room) => {
+    setSelectedRoom(room);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleCloseDetailModal = () => {
+    setIsDetailModalOpen(false);
+    setTimeout(() => setSelectedRoom(null), 300);
+  };
+
   // Loading State
   if (loading) {
     return (
@@ -208,7 +208,6 @@ const RoomShowcase = ({ onQuickBook }: RoomShowcaseProps) => {
             </h2>
           </div>
 
-          {/* Loading Skeleton */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3].map((i) => (
               <div key={i} className="card-elevated overflow-hidden animate-pulse">
@@ -289,113 +288,135 @@ const RoomShowcase = ({ onQuickBook }: RoomShowcaseProps) => {
 
   // Main Content
   return (
-    <section id="rooms" className="section-padding">
-      <div className="max-w-7xl mx-auto">
-        {/* Section Header */}
-        <div className="text-center mb-16 animate-fade-up">
-          <span className="inline-block px-4 py-2 bg-secondary rounded-full text-sm text-muted-foreground font-medium mb-6">
-            Akomodasi
-          </span>
-          <h2 className="heading-section text-foreground mb-4">
-            Pilih Tempat Istirahat Anda
-          </h2>
-          <p className="body-large max-w-2xl mx-auto">
-            Setiap kamar dirancang untuk memberikan pengalaman menginap yang tak terlupakan.
-          </p>
-        </div>
+    <>
+      <section id="rooms" className="section-padding">
+        <div className="max-w-7xl mx-auto">
+          {/* Section Header */}
+          <div className="text-center mb-16 animate-fade-up">
+            <span className="inline-block px-4 py-2 bg-secondary rounded-full text-sm text-muted-foreground font-medium mb-6">
+              Akomodasi
+            </span>
+            <h2 className="heading-section text-foreground mb-4">
+              Pilih Tempat Istirahat Anda
+            </h2>
+            <p className="body-large max-w-2xl mx-auto">
+              Setiap kamar dirancang untuk memberikan pengalaman menginap yang tak terlupakan.
+            </p>
+          </div>
 
-        {/* Room Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {rooms.map((room, index) => (
-            <div
-              key={room.id}
-              className={`card-elevated overflow-hidden group animate-fade-up stagger-${index + 1}`}
-            >
-              {/* Image Carousel */}
-              <div className="relative">
-                <RoomImageCarousel 
-                  images={room.images} 
-                  roomName={room.name}
-                  roomSlug={room.slug}
-                />
-                
-                {/* Price Tag */}
-                <div className="absolute top-4 right-4 glass-strong rounded-2xl px-4 py-2">
-                  <span className="font-semibold text-foreground text-sm">
-                    {formatPrice(room.price_per_night)}
-                  </span>
-                  <span className="text-muted-foreground text-xs">/malam</span>
-                </div>
-
-                {/* Available Rooms Badge */}
-                {room.available_rooms > 0 && room.available_rooms <= 5 && (
-                  <div className="absolute bottom-4 left-4 glass-strong rounded-full px-3 py-1">
-                    <span className="text-xs text-foreground font-medium">
-                      Hanya {room.available_rooms} kamar tersisa!
+          {/* Room Cards Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {rooms.map((room, index) => (
+              <div
+                key={room.id}
+                className={`card-elevated overflow-hidden group animate-fade-up stagger-${index + 1}`}
+              >
+                {/* Image Carousel */}
+                <div className="relative">
+                  <RoomImageCarousel 
+                    images={room.images} 
+                    roomName={room.name}
+                    roomSlug={room.slug}
+                  />
+                  
+                  {/* Price Tag */}
+                  <div className="absolute top-4 right-4 glass-strong rounded-2xl px-4 py-2">
+                    <span className="font-semibold text-foreground text-sm">
+                      {formatPrice(room.price_per_night)}
                     </span>
+                    <span className="text-muted-foreground text-xs">/malam</span>
                   </div>
-                )}
-              </div>
 
-              {/* Content */}
-              <div className="p-6 space-y-4">
-                <div>
-                  <h3 className="font-serif text-xl font-semibold text-foreground mb-2">
-                    {room.name}
-                  </h3>
-                  <p className="text-muted-foreground text-sm line-clamp-2">
-                    {room.description}
-                  </p>
+                  {/* Available Rooms Badge */}
+                  {room.available_rooms > 0 && room.available_rooms <= 5 && (
+                    <div className="absolute bottom-4 left-4 glass-strong rounded-full px-3 py-1">
+                      <span className="text-xs text-foreground font-medium">
+                        Hanya {room.available_rooms} kamar tersisa!
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                {/* Features */}
-                <div className="flex flex-wrap gap-2">
-                  {/* Max Capacity */}
-                  <span className="px-3 py-1 bg-secondary rounded-full text-xs text-muted-foreground">
-                    Max {room.max_capacity} Tamu
-                  </span>
+                {/* Content */}
+                <div className="p-6 space-y-4">
+                  <div>
+                    <h3 className="font-serif text-xl font-semibold text-foreground mb-2">
+                      {room.name}
+                    </h3>
+                    <p className="text-muted-foreground text-sm line-clamp-2">
+                      {room.description}
+                    </p>
+                  </div>
 
-                  {/* Additional Features (show first 2) */}
-                  {room.additional_features.slice(0, 2).map((feature, idx) => (
-                    <span
-                      key={idx}
-                      className="px-3 py-1 bg-secondary rounded-full text-xs text-muted-foreground"
-                    >
-                      {feature}
-                    </span>
-                  ))}
-
-                  {/* Show count if more features */}
-                  {room.additional_features.length > 2 && (
+                  {/* Features */}
+                  <div className="flex flex-wrap gap-2">
+                    {/* Max Capacity */}
                     <span className="px-3 py-1 bg-secondary rounded-full text-xs text-muted-foreground">
-                      +{room.additional_features.length - 2} lainnya
+                      Max {room.max_capacity} Tamu
                     </span>
-                  )}
-                </div>
 
-                {/* Quick Book Button */}
-                <button
-                  onClick={() => onQuickBook(room)}
-                  disabled={room.available_rooms === 0}
-                  className={`w-full flex items-center justify-center gap-2 group/btn ${
-                    room.available_rooms === 0
-                      ? 'btn-secondary opacity-50 cursor-not-allowed'
-                      : 'btn-secondary'
-                  }`}
-                >
-                  <span>
-                    {room.available_rooms === 0 ? 'Sold Out' : 'Quick Book'}
-                  </span>
-                  {room.available_rooms > 0 && (
-                    <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
-                  )}
-                </button>
+                    {/* Additional Features (show first 2) */}
+                    {room.additional_features.slice(0, 2).map((feature, idx) => (
+                      <span
+                        key={idx}
+                        className="px-3 py-1 bg-secondary rounded-full text-xs text-muted-foreground"
+                      >
+                        {feature}
+                      </span>
+                    ))}
+
+                    {/* Show count if more features */}
+                    {room.additional_features.length > 2 && (
+                      <span className="px-3 py-1 bg-secondary rounded-full text-xs text-muted-foreground">
+                        +{room.additional_features.length - 2} lainnya
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-2">
+                    {/* View Details Button */}
+                    <button
+                      onClick={() => handleViewDetails(room)}
+                      className="flex-1 flex items-center justify-center gap-2 btn-secondary group/btn"
+                    >
+                      <Eye className="w-4 h-4" />
+                      <span>Detail</span>
+                    </button>
+
+                    {/* Quick Book Button */}
+                    <button
+                      onClick={() => onQuickBook(room)}
+                      disabled={room.available_rooms === 0}
+                      className={`flex-1 flex items-center justify-center gap-2 group/btn ${
+                        room.available_rooms === 0
+                          ? 'btn-secondary opacity-50 cursor-not-allowed'
+                          : 'btn-primary'
+                      }`}
+                    >
+                      <span>
+                        {room.available_rooms === 0 ? 'Sold Out' : 'Book'}
+                      </span>
+                      {room.available_rooms > 0 && (
+                        <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+
+      {/* Room Detail Modal */}
+      <RoomDetailModal
+        isOpen={isDetailModalOpen}
+        onClose={handleCloseDetailModal}
+        room={selectedRoom}
+        onBook={onQuickBook}
+      />
+    </>
   );
 };
 

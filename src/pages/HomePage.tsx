@@ -1,13 +1,15 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useBooking } from '@/contexts/BookingContext';
 import Navbar from '@/components/Navbar';
-import HeroSection from '@/components/HeroSection'; // ✅ Ini udah bener
+import HeroSection from '@/components/HeroSection';
 import TrustBar from '@/components/TrustBar';
 import BookingBar from '@/components/BookingBar';
 import RoomShowcase from '@/components/RoomShowcase';
+import RoomDetailModal from '@/components/RoomDetailModal';
 import FacilitiesSection from '@/components/FacilitiesSection';
 import CTASection from '@/components/CTASection';
 import AIChatBubble from '@/components/AIChatBubble';
-import BookingModal from '@/components/BookingModal';
 import Footer from '@/components/Footer';
 import { useToast } from '@/hooks/use-toast';
 
@@ -40,15 +42,26 @@ interface Room {
   nights?: number;
 }
 
-const Index = () => {
+const HomePage = () => {
   const { toast } = useToast();
-  const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-  const [selectedRoom, setSelectedRoom] = useState<Room | undefined>(undefined);
+  const navigate = useNavigate();
+  const { setRoom, setDates } = useBooking();
+  
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [guests, setGuests] = useState(2);
   const [availableRooms, setAvailableRooms] = useState<Room[]>([]);
   const [isSearchActive, setIsSearchActive] = useState(false);
+
+  // Calculate nights from dates
+  const calculateNights = (checkInDate: string, checkOutDate: string): number => {
+    if (!checkInDate || !checkOutDate) return 0;
+    const start = new Date(checkInDate);
+    const end = new Date(checkOutDate);
+    const diffTime = Math.abs(end.getTime() - start.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
 
   // Handle Book Now dari Navbar/CTA
   const handleBookNowClick = () => {
@@ -156,7 +169,7 @@ const Index = () => {
     }
   };
 
-  // Handle Quick Book dari RoomShowcase
+  // Handle Quick Book dari RoomShowcase - NAVIGATE TO SERVICES PAGE
   const handleQuickBook = (room: Room) => {
     // Jika belum ada search params, minta user untuk search dulu
     if (!checkIn || !checkOut) {
@@ -171,8 +184,15 @@ const Index = () => {
       return;
     }
 
-    setSelectedRoom(room);
-    setIsBookingModalOpen(true);
+    // Calculate nights
+    const nights = calculateNights(checkIn, checkOut);
+
+    // Save to booking context
+    setRoom(room);
+    setDates(checkIn, checkOut, guests, nights);
+
+    // Navigate to services page
+    navigate('/booking/services');
   };
 
   const handleClearFilter = () => {
@@ -201,7 +221,7 @@ const Index = () => {
       <Navbar onBookNowClick={handleBookNowClick} />
       
       <main>
-        <HeroSection /> {/* ✅ Pake HeroSection */}
+        <HeroSection />
         
         <div id="booking-bar">
           <BookingBar onSearch={handleSearch} />
@@ -315,13 +335,29 @@ const Index = () => {
                       </div>
 
                       {/* Book Button */}
-                      <button
-                        onClick={() => handleQuickBook(room)}
-                        className="w-full btn-secondary flex items-center justify-center gap-2 group/btn"
-                      >
-                        <span>Quick Book</span>
-                        <span className="transition-transform group-hover/btn:translate-x-1">→</span>
-                      </button>
+                      {/* Action Buttons */}
+                      <div className="flex gap-2">
+                        {/* View Details Button */}
+                        <button
+                          onClick={() => handleViewDetails(room)}
+                          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-medium text-[#6A6A6A] bg-[#F5F1E8] hover:bg-[#EDE9DC] transition-colors"
+                        >
+                          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          <span>Detail</span>
+                        </button>
+
+                        {/* Quick Book Button */}
+                        <button
+                          onClick={() => handleQuickBook(room)}
+                          className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-2xl font-medium text-white bg-[#7A8B6B] hover:bg-[#6B7A5B] transition-colors"
+                        >
+                          <span>Book</span>
+                          <span className="transition-transform group-hover/btn:translate-x-1">→</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -339,19 +375,8 @@ const Index = () => {
       <Footer />
       
       <AIChatBubble />
-      
-      <BookingModal
-        isOpen={isBookingModalOpen}
-        onClose={() => setIsBookingModalOpen(false)}
-        room={selectedRoom}
-        checkIn={checkIn}
-        checkOut={checkOut}
-        guests={guests}
-        nights={selectedRoom?.nights || 1}
-        totalPrice={selectedRoom?.total_price || (selectedRoom?.price_per_night || 0)}
-      />
     </div>
   );
 };
 
-export default Index;
+export default HomePage;
