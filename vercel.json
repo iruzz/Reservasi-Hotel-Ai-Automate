@@ -2,7 +2,7 @@
     "rewrites": [
         {
             "source": "api/:path*",
-            "destination": "/api/api/:path*"
+            "destination": "https://apireservasihotel.42web.io/api/:path*"
         }
     ]
 }
