@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import NotFound from "./pages/NotFound";
+import CheckBookingPage from '@/pages/CheckBookingPage';
 import { BookingProvider } from './contexts/BookingContext';
 import BookingServicesPage from './pages/BookingServicesPage';
 import BookingCheckoutPage from './pages/BookingCheckoutPage';
@@ -29,6 +30,8 @@ const App = () => (
             <Route path="/booking/checkout" element={<BookingCheckoutPage />} />
             <Route path="/booking/success/:bookingCode" element={<BookingSuccessPage />} />
             
+            <Route path="/check-booking" element={<CheckBookingPage />} />
+
             {/* 404 - MUST BE LAST */}
             <Route path="*" element={<NotFound />} />
           </Routes>

@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Search } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface NavbarProps {
   onBookNowClick: () => void;
 }
 
 const Navbar = ({ onBookNowClick }: NavbarProps) => {
+  const navigate = useNavigate();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -17,6 +19,11 @@ const Navbar = ({ onBookNowClick }: NavbarProps) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleCheckBooking = () => {
+    navigate('/check-booking');
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
@@ -25,7 +32,7 @@ const Navbar = ({ onBookNowClick }: NavbarProps) => {
     >
       <div className="max-w-7xl mx-auto px-6 md:px-12 flex items-center justify-between">
         {/* Logo */}
-        <a href="#" className="flex items-center gap-2">
+        <a href="/" className="flex items-center gap-2">
           <span className="font-serif text-2xl font-semibold text-foreground tracking-tight">
             Asmaralaya
           </span>
@@ -33,13 +40,20 @@ const Navbar = ({ onBookNowClick }: NavbarProps) => {
         </a>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-8">
+        <div className="hidden md:flex items-center gap-6">
           <a href="#rooms" className="btn-ghost text-sm">
             Explore
           </a>
           <a href="#facilities" className="btn-ghost text-sm">
             Facilities
           </a>
+          <button
+            onClick={handleCheckBooking}
+            className="btn-ghost text-sm flex items-center gap-2"
+          >
+            <Search className="w-4 h-4" />
+            <span>Cek Booking</span>
+          </button>
           <button onClick={onBookNowClick} className="btn-primary text-sm">
             Book Now
           </button>
@@ -72,6 +86,13 @@ const Navbar = ({ onBookNowClick }: NavbarProps) => {
             >
               Facilities
             </a>
+            <button
+              onClick={handleCheckBooking}
+              className="text-foreground py-3 px-4 rounded-2xl hover:bg-secondary/60 transition-colors flex items-center gap-2"
+            >
+              <Search className="w-4 h-4" />
+              <span>Cek Booking</span>
+            </button>
             <button
               onClick={() => {
                 setIsMobileMenuOpen(false);
