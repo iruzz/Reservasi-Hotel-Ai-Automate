@@ -40,8 +40,8 @@ const formatPrice = (price: number) => {
 const getImageUrl = (url: string | undefined) => {
   if (!url) return '';
   if (url.startsWith('http')) return url;
-  if (url.startsWith('/storage/')) return `https://apireservasihotel.42web.io${url}`;
-  return `https://apireservasihotel.42web.io/storage/${url}`;
+  if (url.startsWith('/storage/')) return `/api${url}`;
+  return `/api/storage/${url}`;
 };
 
 const RoomDetailModal = ({ isOpen, onClose, room, onBook }: RoomDetailModalProps) => {
