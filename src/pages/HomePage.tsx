@@ -123,7 +123,7 @@ const HomePage = () => {
         guests: guestCount,
       });
 
-      const response = await fetch('https://apireservasihotel.42web.iohttps://apireservasihotel.42web.io/rooms/check-availability', {
+      const response = await fetch('tps://apireservasihotel.42web.io/rooms/check-availability', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

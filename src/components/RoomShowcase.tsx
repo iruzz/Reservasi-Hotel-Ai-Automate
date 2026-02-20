@@ -157,7 +157,7 @@ const RoomShowcase = ({ onQuickBook }: RoomShowcaseProps) => {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('https://apireservasihotel.42web.iohttps://apireservasihotel.42web.io/rooms', {
+      const response = await fetch('https://apireservasihotel.42web.io/rooms', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
