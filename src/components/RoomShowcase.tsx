@@ -75,10 +75,10 @@ const RoomImageCarousel = ({ images, roomName, roomSlug }: {
     }
     
     if (url.startsWith('/storage/')) {
-      return `https://apireservasihotel.42web.io${url}`;
+      return `/api${url}`;
     }
     
-    return `https://apireservasihotel.42web.io/storage/${url}`;
+    return `/api/storage/${url}`;
   };
 
   return (
@@ -157,7 +157,7 @@ const RoomShowcase = ({ onQuickBook }: RoomShowcaseProps) => {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('https://apireservasihotel.42web.io/api/rooms', {
+      const response = await fetch('/api/api/rooms', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

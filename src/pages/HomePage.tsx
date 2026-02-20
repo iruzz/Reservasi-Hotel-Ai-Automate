@@ -123,7 +123,7 @@ const HomePage = () => {
         guests: guestCount,
       });
 
-      const response = await fetch('https://apireservasihotel.42web.io/api/rooms/check-availability', {
+      const response = await fetch('/api/api/rooms/check-availability', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -285,7 +285,7 @@ const HomePage = () => {
                           room.main_image?.url 
                             ? room.main_image.url.startsWith('http') 
                               ? room.main_image.url 
-                              : `https://apireservasihotel.42web.io/storage/${room.main_image.url}`
+                              : `/api/storage/${room.main_image.url}`
                             : 'https://via.placeholder.com/400x300'
                         }
                         alt={room.main_image?.alt || room.name}
