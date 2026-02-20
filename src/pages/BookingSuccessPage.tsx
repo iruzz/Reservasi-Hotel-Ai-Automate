@@ -56,7 +56,7 @@ const BookingSuccessPage = () => {
 
   const fetchBookingDetail = async () => {
     try {
-      const response = await fetch(`tps://apireservasihotel.42web.io/bookings/${bookingCode}`);
+      const response = await fetch(`https://apireservasihotel.42web.io/bookings/${bookingCode}`);
       const data = await response.json();
       
       if (data.success) {
