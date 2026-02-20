@@ -285,7 +285,7 @@ const HomePage = () => {
                           room.main_image?.url 
                             ? room.main_image.url.startsWith('http') 
                               ? room.main_image.url 
-                              : `hthththththththttps://apireservasihotel.42web.io/storage/${room.main_image.url}`
+                              : `https://apireservasihotel.42web.io/storage/${room.main_image.url}`
                             : 'https://via.placeholder.com/400x300'
                         }
                         alt={room.main_image?.alt || room.name}
