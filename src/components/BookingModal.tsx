@@ -77,10 +77,10 @@ const getImageUrl = (url: string | undefined) => {
   }
   
   if (url.startsWith('/storage/')) {
-    return `/api${url}`;
+    return `https://apireservasihotel.42web.io${url}`;
   }
   
-  return `/api/storage/${url}`;
+  return `https://apireservasihotel.42web.io/storage/${url}`;
 };
 
 const BookingModal = ({
@@ -108,7 +108,7 @@ const BookingModal = ({
   const fetchServices = async () => {
     setIsLoadingServices(true);
     try {
-      const response = await fetch('/api/api/services');
+      const response = await fetch('https://apireservasihotel.42web.iohttps://apireservasihotel.42web.io/services');
       const data = await response.json();
       
       if (data.success) {
