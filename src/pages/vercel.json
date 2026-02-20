@@ -1,0 +1,8 @@
+{
+    "rewrites": [
+        {
+            "source": "/proxy/:path*",
+            "destination": "https://apireservasihotel.42web.io/api/:path*"
+        }
+    ]
+}
