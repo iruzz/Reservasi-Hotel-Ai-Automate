@@ -61,7 +61,7 @@ const BookingServicesPage = () => {
 
   const fetchServices = async () => {
     try {
-      const response = await fetch('https://apireservasihotel.42web.io//services');
+      const response = await fetch('https://apireservasihotel.42web.io/api//services');
       const data = await response.json();
       
       if (data.success) {

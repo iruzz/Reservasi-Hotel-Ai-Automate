@@ -86,7 +86,7 @@ const CheckBookingPage = () => {
 
     try {
       // Updated endpoint - menggunakan /check/{bookingCode}
-      const response = await fetch(`https://apireservasihotel.42web.io//bookings/check/${bookingCode}`);
+      const response = await fetch(`https://apireservasihotel.42web.io/api//bookings/check/${bookingCode}`);
       
       if (!response.ok) {
         const errorData = await response.json();
