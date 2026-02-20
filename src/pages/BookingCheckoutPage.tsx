@@ -93,7 +93,7 @@ const BookingCheckoutPage = () => {
         })),
       };
 
-      const response = await fetch('/proxy/bookings', {
+      const response = await fetch('https://apireservasihotel.42web.io//bookings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -75,10 +75,10 @@ const RoomImageCarousel = ({ images, roomName, roomSlug }: {
     }
     
     if (url.startsWith('/storage/')) {
-      return `/proxy${url}`;
+      return `https://apireservasihotel.42web.io/${url}`;
     }
     
-    return `/proxy/storage/${url}`;
+    return `https://apireservasihotel.42web.io//storage/${url}`;
   };
 
   return (
@@ -157,12 +157,12 @@ const RoomShowcase = ({ onQuickBook }: RoomShowcaseProps) => {
       setLoading(true);
       setError(null);
 
-      const response = await fetch('/proxy/rooms', {
+      const response = await fetch('https://apireservasihotel.42web.io//rooms', {
         method: 'GET',
         headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
+    'Accept': 'application/json',
+    'Content-Type': 'application/json',
+  }
       });
 
       if (!response.ok) {
